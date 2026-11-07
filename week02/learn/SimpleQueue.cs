@@ -1,4 +1,7 @@
-﻿public class SimpleQueue {
+﻿using System;
+using System.Collections.Generic;
+
+public class SimpleQueue {
     public static void Run() {
         // Test Cases
 
@@ -10,7 +13,7 @@
         queue.Enqueue(100);
         var value = queue.Dequeue();
         Console.WriteLine(value);
-        // Defect(s) Found:
+        // Defect(s) Found: Enqueue estaba insertando al principio en lugar del final.
 
         Console.WriteLine("------------");
 
@@ -28,7 +31,7 @@
         Console.WriteLine(value);
         value = queue.Dequeue();
         Console.WriteLine(value);
-        // Defect(s) Found: 
+        // Defect(s) Found: Dequeue estaba sacando el índice 1 en lugar del índice 0.
 
         Console.WriteLine("------------");
 
@@ -44,7 +47,7 @@
         catch (IndexOutOfRangeException) {
             Console.WriteLine("I got the exception as expected.");
         }
-        // Defect(s) Found: 
+        // Defect(s) Found: Ninguno, la excepción funciona bien.
     }
 
     private readonly List<int> _queue = new();
@@ -54,7 +57,8 @@
     /// </summary>
     /// <param name="value">Integer value to add to the queue</param>
     private void Enqueue(int value) {
-        _queue.Insert(0, value);
+        // Corrección: Agregar al final de la cola
+        _queue.Add(value);
     }
 
     /// <summary>
@@ -66,8 +70,9 @@
         if (_queue.Count <= 0)
             throw new IndexOutOfRangeException();
 
-        var value = _queue[1];
-        _queue.RemoveAt(1);
+        // Corrección: Sacar el primer elemento (índice 0)
+        var value = _queue[0];
+        _queue.RemoveAt(0);
         return value;
     }
 }
