@@ -1,3 +1,5 @@
+using System;
+
 /// <summary>
 /// This queue is circular.  When people are added via AddPerson, then they are added to the 
 /// back of the queue (per FIFO rules).  When GetNextPerson is called, the next person
@@ -40,9 +42,16 @@ public class TakingTurnsQueue
         else
         {
             Person person = _people.Dequeue();
+            
+            // CORRECTION: Check if turns is > 1 to decrement and re-queue.
             if (person.Turns > 1)
             {
                 person.Turns -= 1;
+                _people.Enqueue(person);
+            }
+            // CORRECTION: Re-queue if turns <= 0 (infinite turns) without decrementing.
+            else if (person.Turns <= 0)
+            {
                 _people.Enqueue(person);
             }
 
