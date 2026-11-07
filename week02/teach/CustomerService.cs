@@ -1,34 +1,48 @@
-﻿/// <summary>
-/// Maintain a Customer Service Queue.  Allows new customers to be 
+﻿using System;
+using System.Collections.Generic;
+
+/// <summary>
+/// Maintain a Customer Service Queue. Allows new customers to be 
 /// added and allows customers to be serviced.
 /// </summary>
 public class CustomerService {
     public static void Run() {
-        // Example code to see what's in the customer service queue:
-        // var cs = new CustomerService(10);
-        // Console.WriteLine(cs);
-
         // Test Cases
 
         // Test 1
-        // Scenario: 
-        // Expected Result: 
+        // Scenario: Add a customer and serve them.
+        // Expected Result: It should prompt for info, then display the exact customer info when served.
         Console.WriteLine("Test 1");
-
-        // Defect(s) Found: 
+        var cs1 = new CustomerService(2);
+        Console.WriteLine("--> Type a Name, ID, and Problem for Test 1:");
+        cs1.AddNewCustomer(); 
+        cs1.ServeCustomer();
+        // Defect(s) Found: ServeCustomer was removing the customer from the queue BEFORE saving their data, causing a crash or wrong data.
 
         Console.WriteLine("=================");
 
         // Test 2
-        // Scenario: 
-        // Expected Result: 
+        // Scenario: Try to serve a customer when the queue is completely empty.
+        // Expected Result: It should print an error message instead of crashing.
         Console.WriteLine("Test 2");
-
-        // Defect(s) Found: 
+        var cs2 = new CustomerService(2);
+        cs2.ServeCustomer();
+        // Defect(s) Found: ServeCustomer had no check for an empty queue, which threw an IndexOutOfRangeException.
 
         Console.WriteLine("=================");
 
-        // Add more Test Cases As Needed Below
+        // Test 3
+        // Scenario: Try to add more customers than the maximum size allowed.
+        // Expected Result: The 3rd attempt should print "Maximum Number of Customers in Queue."
+        Console.WriteLine("Test 3");
+        var cs3 = new CustomerService(2);
+        Console.WriteLine("--> Type info for Customer 1:");
+        cs3.AddNewCustomer();
+        Console.WriteLine("--> Type info for Customer 2:");
+        cs3.AddNewCustomer();
+        Console.WriteLine("--> Attempting to add Customer 3 (Queue should be full):");
+        cs3.AddNewCustomer();
+        // Defect(s) Found: AddNewCustomer used '> _maxSize' instead of '>= _maxSize', allowing one extra customer to bypass the limit.
     }
 
     private readonly List<Customer> _queue = new();
@@ -43,7 +57,7 @@ public class CustomerService {
 
     /// <summary>
     /// Defines a Customer record for the service queue.
-    /// This is an inner class.  Its real name is CustomerService.Customer
+    /// This is an inner class. Its real name is CustomerService.Customer
     /// </summary>
     private class Customer {
         public Customer(string name, string accountId, string problem) {
@@ -62,12 +76,12 @@ public class CustomerService {
     }
 
     /// <summary>
-    /// Prompt the user for the customer and problem information.  Put the 
+    /// Prompt the user for the customer and problem information. Put the 
     /// new record into the queue.
     /// </summary>
     private void AddNewCustomer() {
-        // Verify there is room in the service queue
-        if (_queue.Count > _maxSize) {
+        // CORRECCIÓN 1: Se cambió > por >= para respetar el límite máximo correctamente.
+        if (_queue.Count >= _maxSize) {
             Console.WriteLine("Maximum Number of Customers in Queue.");
             return;
         }
@@ -88,8 +102,15 @@ public class CustomerService {
     /// Dequeue the next customer and display the information.
     /// </summary>
     private void ServeCustomer() {
-        _queue.RemoveAt(0);
+        // CORRECCIÓN 2: Se agregó la validación para evitar que el programa colapse si la cola está vacía.
+        if (_queue.Count <= 0) {
+            Console.WriteLine("No Customers in Queue to Serve.");
+            return;
+        }
+
+        // CORRECCIÓN 3: El cliente debe guardarse en la variable ANTES de ser eliminado de la cola.
         var customer = _queue[0];
+        _queue.RemoveAt(0);
         Console.WriteLine(customer);
     }
 
